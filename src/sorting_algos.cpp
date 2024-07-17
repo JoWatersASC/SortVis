@@ -2,14 +2,19 @@
 
 namespace MySrt
 {
-	std::map<std::string, void (*)(std::vector<int>&)> sort_funcs = {
-			{"Bubble Sort", &bubbleSort},
-			{"Insertion Sort", &insertionSort},
-			{"Selection Sort", &selectionSort},
-			{"Recursive Merge Sort", &mergeSortR},
-			{"Iterative Merge Sort", &mergeSortI},
-			{"Recursive Quick Sort", &quickSortR},
-			{"Iterative Quick Sort", &quickSortI},
-			{"Heap Sort", &heapSort}
+	template<class T>
+	std::map<std::string, std::function<void(std::vector<T>&)>> sort_funcs = {
+			{"Bubble Sort", &bubbleSort<T>},
+			{"Insertion Sort", &insertionSort<T>},
+			{"Selection Sort", &selectionSort<T>},
+			{"Recursive Merge Sort", &mergeSortR<T>},
+			{"Iterative Merge Sort", &mergeSortI<T>},
+			{"Recursive Quick Sort", &quickSortR<T>},
+			{"Iterative Quick Sort", &quickSortI<T>},
+			{"Heap Sort", &heapSort<T>}
 	};
+
+	template std::map<std::string, std::function<void(std::vector<int>&)>> sort_funcs<int>;
+	template std::map<std::string, std::function<void(std::vector<std::string>&)>> sort_funcs<std::string>;
+	template std::map<std::string, std::function<void(std::vector<float>&)>> sort_funcs<float>;
 };

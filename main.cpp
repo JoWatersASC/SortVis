@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 			std::cout << list << " List\n__________________________________________\n";
 
 
-			for (auto funct : MySrt::sort_funcs) {
+			for (auto funct : MySrt::sort_funcs<int>) {
 				std::vector<int> vect(v);
 				std::cout << list << " " << funct.first << " on " << 50000 << " elements\n";
 

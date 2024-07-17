@@ -3,8 +3,8 @@
 
 #include<stdlib.h>
 #include<vector>
-#include<stack>
 #include<memory>
+#include<stack>
 #include<map>
 #include<functional>
 #include<string>
@@ -428,8 +428,8 @@ namespace MySrt {
 //Array of sorting functions
 //--------------------------
 namespace MySrt {
-	//template<class T>
-	extern std::map<std::string, void (*)(std::vector<int>&)> sort_funcs;
+	template<class T>
+	extern std::map<std::string, std::function<void(std::vector<T>&)>> sort_funcs;
 }
 
 #endif
