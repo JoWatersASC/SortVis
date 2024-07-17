@@ -1,3 +1,6 @@
+#On linux branch don't use sdl2 folder
+/SDL2
+
 #C++
 # Prerequisites
 *.d
