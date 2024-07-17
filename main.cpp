@@ -17,7 +17,7 @@
 #include <chrono>
 #include <time.h>
 
-#include"application.h"
+#include"sorting_window.h"
 
 int main(int argc, char** argv) {
 	{
@@ -25,29 +25,29 @@ int main(int argc, char** argv) {
 		typedef std::chrono::high_resolution_clock hrc;
 		typedef std::chrono::duration<double, std::milli> milliSecs;
 		typedef std::vector<int> intVec;
-		typedef std::pair<std::string, std::vector<float>> sv_pair;
+		typedef std::pair<std::string, std::vector<int>> sv_pair;
 
-		std::map<std::string, std::vector<float>> lists;
+		std::map<std::string, std::vector<int>> lists;
 
 		//Populates random, ascending, and descending lists
 		{
 			srand(static_cast<unsigned int>(time(0)));
 			for (int i = 0; i < 5000; i++) {
 				lists["Random"].push_back(rand());
-				lists["Ascending"].push_back((float)i);
-				lists["Descending"].push_back(5000.0f - (float)i);
+				lists["Ascending"].push_back(i);
+				lists["Descending"].push_back(5000 - i);
 			}
 
 		}
 
 		for (sv_pair p : lists) {
 			std::string list = p.first;
-			std::vector<float> v = p.second;
+			std::vector<int> v = p.second;
 			std::cout << list << " List\n__________________________________________\n";
 
 
-			for (auto funct : MySrt::functions) {
-				std::vector<float> vect(v);
+			for (auto funct : MySrt::sort_funcs) {
+				std::vector<int> vect(v);
 				std::cout << list << " " << funct.first << " on " << 50000 << " elements\n";
 
 				auto start = hrc::now();

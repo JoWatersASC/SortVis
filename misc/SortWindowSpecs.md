@@ -1,16 +1,20 @@
 # Sorting Window Class
 
+#### declare struct dim{ x and y } and struct position{ x and y }
 ## Private Members
 - vector of ints
-- struct dim{x and y}
-- struct position{x and y}
+- dimension dim
+- position pos
 
 ## Public Members
-- constructor
-- render function (dim and pos)
+- #### constructor (void)
+- #### render function (dim and pos)
     - renders bars representing elems of vector
     - renders execution time of sort, using high res clock
     - renders window
+- #### friend colision function (sorting window)
+    - takes another window for collisions
+    - uses position and dimension members to check
 
 ### Window Components
 - vector bars

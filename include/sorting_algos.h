@@ -1,9 +1,13 @@
-#pragma once
+#ifndef SORTING_ALGOS_H
+#define SORTING_ALGOS_H
+
 #include<stdlib.h>
 #include<vector>
 #include<stack>
 #include<memory>
 #include<map>
+#include<functional>
+#include<string>
 
 //----------------------
 //Function Declarations
@@ -425,14 +429,7 @@ namespace MySrt {
 //--------------------------
 namespace MySrt {
 	//template<class T>
-	std::map<std::string, void (*)(std::vector<float>&)> functions = {
-		{"Bubble Sort", &bubbleSort},
-		{"Insertion Sort", &insertionSort},
-		{"Selection Sort", &selectionSort},
-		{"Recursive Merge Sort", &mergeSortR},
-		{"Iterative Merge Sort", &mergeSortI},
-		{"Recursive Quick Sort", &quickSortR},
-		{"Iterative Quick Sort", &quickSortI},
-		{"Heap Sort", &heapSort}
-	};
+	extern std::map<std::string, void (*)(std::vector<int>&)> sort_funcs;
 }
+
+#endif
