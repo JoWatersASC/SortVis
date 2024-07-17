@@ -5,18 +5,67 @@
 #include"imgui_impl_sdl2.h"
 #include"imgui_impl_sdlrenderer2.h"
 
-#include<stdio.h>
 #include<SDL.h>
-
 #if defined(IMGUI_IMPL_OPENGL_ES2)
 #include <SDL_opengles2.h>
 #else
 #include <SDL_opengl.h>
 #endif
 
+#include <random>
+#include <ctime>
+#include <chrono>
+#include <time.h>
+
 #include"sorting_algos.h"
 
 int main(int argc, char** argv) {
+	{
+		typedef std::chrono::milliseconds MSec;
+		typedef std::chrono::high_resolution_clock hrc;
+		typedef std::chrono::duration<double, std::milli> milliSecs;
+		typedef std::vector<int> intVec;
+		typedef std::pair<std::string, std::vector<float>> sv_pair;
+
+		std::map<std::string, std::vector<float>> lists;
+
+		//Populates random, ascending, and descending lists
+		{
+			srand(static_cast<unsigned int>(time(0)));
+			for (int i = 0; i < 5000; i++) {
+				lists["Random"].push_back(rand());
+				lists["Ascending"].push_back((float)i);
+				lists["Descending"].push_back(5000.0f - (float)i);
+			}
+
+		}
+
+		for (sv_pair p : lists) {
+			std::string list = p.first;
+			std::vector<float> v = p.second;
+			std::cout << list << " List\n__________________________________________\n";
+
+
+			for (auto funct : MySrt::functions) {
+				std::vector<float> vect(v);
+				std::cout << list << " " << funct.first << " on " << 50000 << " elements\n";
+
+				auto start = hrc::now();
+				funct.second(vect);
+				auto end = hrc::now();
+
+				milliSecs executionDuration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+
+				printf("\r%d element %s list %s completed in %.3f milliseconds\n", 5000, list.c_str(), funct.first.c_str(), executionDuration.count());
+
+				std::cout << std::endl;
+				std::cout << std::endl;
+			}
+		}
+	}
+
+
+
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 	SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);	
 	if (window == nullptr)
