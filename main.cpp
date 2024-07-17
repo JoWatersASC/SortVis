@@ -17,7 +17,7 @@
 #include <chrono>
 #include <time.h>
 
-#include"sorting_algos.h"
+#include"application.h"
 
 int main(int argc, char** argv) {
 	{
