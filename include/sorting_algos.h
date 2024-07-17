@@ -429,7 +429,7 @@ namespace MySrt {
 //--------------------------
 namespace MySrt {
 	template<class T>
-	extern std::map<std::string, std::function<void(std::vector<T>&)>> sort_funcs;
+	extern const std::map<std::string, std::function<void(std::vector<T>&)>> sort_funcs;
 }
 
 #endif

@@ -15,6 +15,7 @@
 - #### friend colision function (sorting window)
     - takes another window for collisions
     - uses position and dimension members to check
+- static pointer list of window objects
 
 ### Window Components
 - vector bars

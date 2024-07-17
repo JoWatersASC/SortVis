@@ -13,9 +13,6 @@
 #endif
 
 #include <random>
-#include <ctime>
-#include <chrono>
-#include <time.h>
 
 #include"sorting_window.h"
 
