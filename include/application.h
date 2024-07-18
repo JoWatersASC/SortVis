@@ -6,6 +6,10 @@ namespace MySrt{
     void End();
 
     void RenderMainMenuBar();
+    void RenderMainMenuOptions();
+    void RenderMainMenuAbout();
+
+    void RenderInputs();
     void RenderWindows();
     void Sort();
 }
