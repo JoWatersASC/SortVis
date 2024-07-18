@@ -1,70 +1,58 @@
 #include<iostream>
 
-#include"imgui.h"
-#include"imgui_impl_opengl3.h"
-#include"imgui_impl_sdl2.h"
-#include"imgui_impl_sdlrenderer2.h"
-
-#include<SDL.h>
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <SDL_opengles2.h>
-#else
-#include <SDL_opengl.h>
-#endif
-
 #include <random>
 
-#include"sorting_window.h"
+#include"application.h"
 
 int main(int argc, char** argv) {
-	{
-		typedef std::chrono::milliseconds MSec;
-		typedef std::chrono::high_resolution_clock hrc;
-		typedef std::chrono::duration<double, std::milli> milliSecs;
-		typedef std::vector<int> intVec;
-		typedef std::pair<std::string, std::vector<int>> sv_pair;
+	//{
+	//	typedef std::chrono::milliseconds MSec;
+	//	typedef std::chrono::high_resolution_clock hrc;
+	//	typedef std::chrono::duration<double, std::milli> milliSecs;
+	//	typedef std::vector<int> intVec;
+	//	typedef std::pair<std::string, std::vector<int>> sv_pair;
 
-		std::map<std::string, std::vector<int>> lists;
+	//	std::map<std::string, std::vector<int>> lists;
 
-		//Populates random, ascending, and descending lists
-		{
-			srand(static_cast<unsigned int>(time(0)));
-			for (int i = 0; i < 5000; i++) {
-				lists["Random"].push_back(rand());
-				lists["Ascending"].push_back(i);
-				lists["Descending"].push_back(5000 - i);
-			}
+	//	//Populates random, ascending, and descending lists
+	//	{
+	//		srand(static_cast<unsigned int>(time(0)));
+	//		for (int i = 0; i < 5000; i++) {
+	//			lists["Random"].push_back(rand());
+	//			lists["Ascending"].push_back(i);
+	//			lists["Descending"].push_back(5000 - i);
+	//		}
 
-		}
+	//	}
 
-		for (sv_pair p : lists) {
-			std::string list = p.first;
-			std::vector<int> v = p.second;
-			std::cout << list << " List\n__________________________________________\n";
+	//	for (sv_pair p : lists) {
+	//		std::string list = p.first;
+	//		std::vector<int> v = p.second;
+	//		std::cout << list << " List\n__________________________________________\n";
 
 
-			for (auto funct : MySrt::sort_funcs<int>) {
-				std::vector<int> vect(v);
-				std::cout << list << " " << funct.first << " on " << 50000 << " elements\n";
+	//		for (auto funct : MySrt::sort_funcs<int>) {
+	//			std::vector<int> vect(v);
+	//			std::cout << list << " " << funct.first << " on " << 50000 << " elements\n";
 
-				auto start = hrc::now();
-				funct.second(vect);
-				auto end = hrc::now();
+	//			auto start = hrc::now();
+	//			funct.second(vect);
+	//			auto end = hrc::now();
 
-				milliSecs executionDuration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+	//			milliSecs executionDuration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
 
-				printf("\r%d element %s list %s completed in %.3f milliseconds\n", 5000, list.c_str(), funct.first.c_str(), executionDuration.count());
+	//			printf("\r%d element %s list %s completed in %.3f milliseconds\n", 5000, list.c_str(), funct.first.c_str(), executionDuration.count());
 
-				std::cout << std::endl;
-				std::cout << std::endl;
-			}
-		}
-	}
+	//			std::cout << std::endl;
+	//			std::cout << std::endl;
+	//		}
+	//	}
+	//}
 
 
 
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-	SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);	
+	SDL_Window* window = SDL_CreateWindow("Sorting Algorithm Visualizer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);	
 	if (window == nullptr)
 	{
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -99,6 +87,8 @@ int main(int argc, char** argv) {
 	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 	bool done = false;
+	MySrt::Start();
+
 	while(!done)
 	{
 		SDL_Event event;
@@ -123,7 +113,13 @@ int main(int argc, char** argv) {
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 
-		// 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
+		{
+			MySrt::Run();
+		}
+
+		//printf("\rWidth: %.0f, Height: %.0f", ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y);
+
+		 /*2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.*/
 		{
 			static float f = 0.0f;
 			static int counter = 0;
@@ -164,6 +160,8 @@ int main(int argc, char** argv) {
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		SDL_GL_SwapWindow(window);
 	}
+
+	MySrt::End();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

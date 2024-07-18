@@ -16,6 +16,7 @@
     - takes another window for collisions
     - uses position and dimension members to check
 - static pointer list of window objects
+- static window flag list, all window settings should be same
 
 ### Window Components
 - vector bars
@@ -24,5 +25,6 @@
 - logarithmic slider for num elems
 - non movable
 - non collapsable
+- no nav
 - if only one window, non closable
 
