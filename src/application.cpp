@@ -40,7 +40,7 @@ namespace MySrt{
         ImVec2 displaySize = ImGui::GetIO().DisplaySize;
         ImGui::SetNextWindowSize(displaySize);
         ImGui::SetNextWindowPos({ 0, 0 });
-        ImGui::Begin("Application Window", NULL, winFlags_ | ImGuiWindowFlags_NoBringToFrontOnFocus);
+        ImGui::Begin("Application Window", NULL, winFlags_ | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar);
 
         RenderMainMenuBar();
         RenderWindows();
@@ -66,12 +66,8 @@ namespace MySrt{
     }
 
     void RenderMainMenuBar() {
-        if (ImGui::BeginMainMenuBar())
+        if (ImGui::BeginMenuBar())
         {
-            if (ImGui::BeginMenu("Sort")) {
-                Sort();
-                ImGui::EndMenu();
-            }
             if (ImGui::BeginMenu("Options"))
             {
                 if (ImGui::BeginMenu("Add Sorting Function"))
@@ -113,12 +109,12 @@ namespace MySrt{
                 ImGui::EndMenu();
             }
 
-            ImGui::EndMainMenuBar();
+            ImGui::EndMenuBar();
         }
     }
 
     void RenderWindows() {
-        ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar;
+        ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
 
         SWL_itr it = SWL->begin();
 
