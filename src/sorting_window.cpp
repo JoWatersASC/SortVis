@@ -20,15 +20,15 @@ namespace MySrt
 
 		if (!SortingWindowList || SortingWindowList->size() == 0) {
 			(*SortingWindowList)[std::string(sortFunc)] = this;
-		}else if (!SortingWindowList->count(str) && sort_funcs<elemType>.count(str) && SortingWindowList->size() < sort_funcs<elemType>.size()) {
+		}else if (!SortingWindowList->count(str) && sort_funcs.count(str) && SortingWindowList->size() < sort_funcs.size()) {
 			(*SortingWindowList)[std::string(sortFunc)] = this;
 		}
 		else {
 			if(SortingWindowList->count(str))
 				throw std::runtime_error("Window of " + std::string(str) + " already exists");
-			if (!sort_funcs<elemType>.count(str))
+			if (!sort_funcs.count(str))
 				throw std::runtime_error(std::string(str) + " not in sorting function list");
-			if (SortingWindowList->size() >= sort_funcs<elemType>.size())
+			if (SortingWindowList->size() >= sort_funcs.size())
 				throw std::runtime_error("Maximum number of windows created");
 		}
 	}
@@ -38,15 +38,15 @@ namespace MySrt
 		if (SortingWindowList->size() == 0) {
 			SortingWindowList->operator[](std::string(sortFunc)) = this;
 		}
-		else if (!SortingWindowList->count(str) && sort_funcs<elemType>.count(str) && SortingWindowList->size() < sort_funcs<elemType>.size()) {
+		else if (!SortingWindowList->count(str) && sort_funcs.count(str) && SortingWindowList->size() < sort_funcs.size()) {
 			SortingWindowList->operator[](std::string(sortFunc)) = this;
 		}
 		else {
 			if (SortingWindowList->count(str))
 				throw std::runtime_error("Window of " + std::string(str) + " already exists");
-			if (!sort_funcs<elemType>.count(str))
+			if (!sort_funcs.count(str))
 				throw std::runtime_error(std::string(str) + " not in sorting function list");
-			if (SortingWindowList->size() >= sort_funcs<elemType>.size())
+			if (SortingWindowList->size() >= sort_funcs.size())
 				throw std::runtime_error("Maximum number of windows created");
 		}
 	}
@@ -86,7 +86,7 @@ namespace MySrt
 				}
 				if (ImGui::BeginMenu("Sorting Algorithm")) 
 				{
-					for (auto it : sort_funcs<elemType>) {
+					for (auto it : sort_funcs) {
 						std::string sortFuncItem = it.first;
 
 						if (!SortingWindowList->count(sortFuncItem)) {

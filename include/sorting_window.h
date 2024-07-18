@@ -31,6 +31,7 @@ namespace MySrt
 		HRC timer;
 		bool *open;
 
+
 	public:
 		SortingWindow(ImVec2);
 		SortingWindow(ImVec2, char*);
