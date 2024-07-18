@@ -106,6 +106,8 @@ int main(int argc, char** argv) {
 		ImGui_ImplSDL2_NewFrame();
 		ImGui::NewFrame();
 		
+		ImVec2 dispSize = ImGui::GetIO().DisplaySize;
+		//printf("%.0f, %.0f\n", dispSize.x, dispSize.y);
 		//DEMO WINDOW_______________________________________________________
 		//__________________________________________________________________
 		//__________________________________________________________________

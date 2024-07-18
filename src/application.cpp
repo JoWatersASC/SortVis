@@ -1,14 +1,20 @@
 #include"application.h"
-#include"imgui_internal.h" //for debugging purposes, remove for build
+//#include"imgui_internal.h" //for debugging purposes, remove for build
 
 namespace MySrt{
-    const ImGuiWindowFlags winFlags_ = (
+    static const ImGuiWindowFlags winFlags_ = (
         ImGuiWindowFlags_NoDecoration |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoNav |
-        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoMove       |
+        ImGuiWindowFlags_NoNav        |
+        ImGuiWindowFlags_NoCollapse   |
         ImGuiWindowFlags_NoSavedSettings
     );
+    static const ImGuiSliderFlags sliderFlags = (
+        ImGuiSliderFlags_AlwaysClamp | 
+        ImGuiSliderFlags_Logarithmic
+    );
+
+    static int numItems = 2;
 
     std::map<std::string, bool> windows_closed;
     ImVec2 winDim;
@@ -18,6 +24,9 @@ namespace MySrt{
     std::map<std::string, SortingWindow*>* SWL;
     SWL_itr swlEnd;
 
+    //*******************************************************************************************************\\
+                                        Main Application Functions
+    //*******************************************************************************************************\\
     //Place before main loop
     void Start() {
         cleaned = false;
@@ -37,22 +46,15 @@ namespace MySrt{
 
     //Place inside main loop
     void Run(){
-        if (ImGui::BeginMainMenuBar())
-        {
-            if (ImGui::BeginMenu("Options"))
-            {
-                RenderMainMenuOptions();
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("My Links")) {
-                RenderMainMenuAbout();
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
+        RenderMainMenuBar();
+
+        ImGui::SetNextWindowPos({ 0, 0 });
+        ImGui::Begin("Content", NULL, winFlags_);
 
         RenderInputs();
         RenderWindows();
+
+        ImGui::End();
     }
 
     //Place after main loop
@@ -72,8 +74,24 @@ namespace MySrt{
         cleaned = true;
     }
 
+    //*******************************************************************************************************\\
+                                      Render Application Window Items Functions
+    //*******************************************************************************************************\\
+    
     void RenderMainMenuBar() {
-
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Options"))
+            {
+                RenderMainMenuOptions();
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("My Links")) {
+                RenderMainMenuAbout();
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
     }
     void RenderMainMenuOptions() {
         if (ImGui::BeginMenu("Add Sorting Function"))
@@ -111,7 +129,12 @@ namespace MySrt{
         }
     }
 
-    void RenderInputs() {}
+    void RenderInputs() {
+        ImGui::SliderInt("Value", &numItems, 2, 50000, "%d", sliderFlags); ImGui::SameLine();
+        if (ImGui::Button("Confirm")) {
+
+        }
+    }
 
     void RenderWindows() {
         ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
