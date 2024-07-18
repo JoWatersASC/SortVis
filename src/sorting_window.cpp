@@ -139,7 +139,7 @@ namespace MySrt {
 	#if defined(_WIN64)
 			system(("start " + url).c_str());
 	#elif defined(__linux__)
-			system(("xdg-open" + url).c_str());
+			system(("xdg-open " + url).c_str());
 	#endif
 	}
 }
