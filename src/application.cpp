@@ -1,43 +1,61 @@
 #include"application.h"
+
 //#include"imgui_internal.h" //for debugging purposes, remove for build
 
-namespace MySrt{
+//*******************************************************************************************************\\
+                                        Application Variables
+//*******************************************************************************************************\\
+
+namespace MySrt {
     static const ImGuiWindowFlags winFlags_ = (
         ImGuiWindowFlags_NoDecoration |
-        ImGuiWindowFlags_NoMove       |
-        ImGuiWindowFlags_NoNav        |
-        ImGuiWindowFlags_NoCollapse   |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoNav |
+        ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoSavedSettings
-    );
+        );
     static const ImGuiSliderFlags sliderFlags = (
-        ImGuiSliderFlags_AlwaysClamp | 
+        ImGuiSliderFlags_AlwaysClamp |
         ImGuiSliderFlags_Logarithmic
-    );
+        );
 
-    static int numItems = 2;
+    ImVec2 dspSize;
 
-    std::map<std::string, bool> windows_closed;
+    static int numItems = 2; //variable to be passed to windows
+    static int numItems_ = 2; //variable to be edited with slider (ONLY EDIT IN WINDOW VECTOR MOD FUNCTIONS)
+
+    //Holds window values - which windows are open(by sorting algo) and dimensions of window 
+    static std::map<std::string, bool> windows_open;
     ImVec2 winDim;
-    bool cleaned;
 
     typedef std::map<std::string, SortingWindow*>::iterator SWL_itr;
-    std::map<std::string, SortingWindow*>* SWL;
-    SWL_itr swlEnd;
+    static std::map<std::string, SortingWindow*>* SWL;
+    static SWL_itr swlEnd;
 
-    //*******************************************************************************************************\\
-                                        Main Application Functions
-    //*******************************************************************************************************\\
+    //Random number generator
+    static std::random_device rand_dev;
+    static std::mt19937 generate(rand_dev);
+
+    //Verifies that End() has been called after Start()
+    bool cleaned;
+}
+
+//*******************************************************************************************************\\
+                                    Main Application Functions
+//*******************************************************************************************************\\
+    
+namespace MySrt {
     //Place before main loop
     void Start() {
         cleaned = false;
         winDim = { 350, 275 };
+        dspSize = ImGui::GetIO().DisplaySize;
+
+        windows_open["Selection Sort"] = true;
 
         SortingWindow::SortingWindowList = new std::map<std::string, SortingWindow*>();
-
-        windows_closed["Selection Sort"] = true;
-
         SortingWindow::SortingWindowList->operator[]("Selection Sort") =
-            new SortingWindow({40, 180}, "Selection Sort", &windows_closed["Selection Sort"]);
+            new SortingWindow({ 40, 180 }, "Selection Sort", &windows_open["Selection Sort"]);
 
         SWL = SortingWindow::SortingWindowList;
 
@@ -45,11 +63,16 @@ namespace MySrt{
     }
 
     //Place inside main loop
-    void Run(){
+    void Run() {
+        dspSize = ImGui::GetIO().DisplaySize;
+        dspSize.x -= 4; // leaves 2 pixels on either side
+        dspSize.y -= 22; //leaves 2 pixels above(mainMenuBar is 18 pixels) and below
+
         RenderMainMenuBar();
 
-        ImGui::SetNextWindowPos({ 0, 0 });
-        ImGui::Begin("Content", NULL, winFlags_);
+        ImGui::SetNextWindowPos({ 2, 20 });
+        ImGui::SetNextWindowSize(dspSize);
+        ImGui::Begin("Content Window", NULL, winFlags_ | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         RenderInputs();
         RenderWindows();
@@ -63,7 +86,7 @@ namespace MySrt{
         int size = SWL->size();
         int count = 0;
 
-        while(count < size && it != swlEnd){
+        while (count < size && it != swlEnd) {
             delete it->second;
             count++;
             it++;
@@ -73,11 +96,13 @@ namespace MySrt{
         delete SortingWindow::SortingWindowList;
         cleaned = true;
     }
+}
 
-    //*******************************************************************************************************\\
-                                      Render Application Window Items Functions
-    //*******************************************************************************************************\\
+//*******************************************************************************************************\\
+                                  Render Application Window Items Functions
+//*******************************************************************************************************\\
     
+namespace MySrt{
     void RenderMainMenuBar() {
         if (ImGui::BeginMainMenuBar())
         {
@@ -103,10 +128,10 @@ namespace MySrt{
 
                 if (ImGui::MenuItem(sortFuncItem.c_str()))
                 {
-                    windows_closed[sortFuncItem] = true;
+                    windows_open[sortFuncItem] = true;
                     SortingWindow::SortingWindowList->operator[](sortFuncItem) =
                         new SortingWindow({ 40 + SWL->size() * (winDim.x + 20), 180 },
-                            sortFuncItem.c_str(), &windows_closed[sortFuncItem]);
+                            sortFuncItem.c_str(), &windows_open[sortFuncItem]);
                 }
             }
 
@@ -130,8 +155,18 @@ namespace MySrt{
     }
 
     void RenderInputs() {
-        ImGui::SliderInt("Value", &numItems, 2, 50000, "%d", sliderFlags); ImGui::SameLine();
-        if (ImGui::Button("Confirm")) {
+        ImGui::SliderInt("Value", &numItems_, 2, 50000, "%d", sliderFlags); ImGui::SameLine();
+
+        //if (ImGui::BeginTooltip()) 
+        //{
+        //    const char* helpText = "\"Ctrl + click to edit manually\"";
+        //    ImGui::TextUnformatted(helpText);
+
+        //    ImGui::EndTooltip();
+        //} ImGui::SameLine();
+
+        if (ImGui::Button("Confirm")) { numItems = numItems_; }
+        if (ImGui::Button("Reset Windows")) {
 
         }
     }
@@ -157,4 +192,23 @@ namespace MySrt{
     }
 
     void Sort(){}
+
+    void Reset(bool setNewVect) {
+        if (setNewVect) {
+            std::vector<int> newVect;
+            
+            for (int i = 0; i < numItems; i++) {
+                newVect.push_back(generate() % (3 * numItems / 2));
+            }
+
+            SortingWindow::winStartList = newVect;
+            for (auto [winName, isOpen] : windows_open) {
+
+            }
+            return;
+        }
+        else {
+
+        }
+    }
 }

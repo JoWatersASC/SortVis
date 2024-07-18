@@ -32,6 +32,8 @@ namespace MySrt
 		HRC timer;
 		bool *open;
 
+		bool RenderMenuBar();
+		bool RenderList();
 
 	public:
 		SortingWindow(ImVec2);
@@ -47,6 +49,7 @@ namespace MySrt
 		bool isOpen();
 		friend bool colliding(const SortingWindow&, const SortingWindow&);
 
+		static std::vector<int> winStartList;
 		static std::map<std::string, SortingWindow*>* SortingWindowList;
 	};
 }
