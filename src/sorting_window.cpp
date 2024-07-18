@@ -68,15 +68,14 @@ namespace MySrt
 		
 		ImGui::Begin(sortFunc, open, winFlags);
 
-		printf("%s\n", sortFunc);
 		{
 			if (ImGui::BeginMenuBar())
 			{
 				if (ImGui::BeginMenu("Options")) 
 				{
-					if (ImGui::MenuItem("Sorting Function")) 
+					if (ImGui::MenuItem("link")) 
 					{
-						// Handle opening a file
+						open_url("https://www.google.com");
 					}
 					if (ImGui::MenuItem("Close")) 
 					{
@@ -133,4 +132,14 @@ namespace MySrt
 		return open;
 	}
 	bool colliding(const SortingWindow& a, const SortingWindow& b){ return a.sortFunc == b.sortFunc; }
+}
+
+namespace MySrt {
+	void open_url(const std::string& url) {
+	#if defined(_WIN64)
+			system(("start " + url).c_str());
+	#elif defined(__linux__)
+			system(("xdg-open" + url).c_str());
+	#endif
+	}
 }

@@ -2,6 +2,7 @@
 
 namespace MySrt
 {
+	//DOES NOT WORK IN LINUX
 	//template<class T>
 	//const std::map<std::string, std::function<void(std::vector<T>&)>> sort_funcs = {
 	//		{"Bubble Sort", &bubbleSort},
@@ -24,6 +25,8 @@ namespace MySrt
 		{"Iterative Quick Sort", &quickSortI<int>},
 		{"Heap Sort", &heapSort<int>}
 	};
+
+	//DOES NOT WORK IN LINUX
 	//template<> const std::map<std::string, std::function<void(std::vector<float>&)>> sort_funcs<float> = {
 	//	{"Bubble Sort", &bubbleSort<float>},
 	//	{ "Insertion Sort", &insertionSort<float> },

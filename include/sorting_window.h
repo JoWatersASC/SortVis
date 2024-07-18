@@ -2,6 +2,7 @@
 #define SORTING_WINDOW_H
 
 #include <chrono>
+#include <cstdlib>
 
 #include"imgui.h"
 #include"imgui_impl_opengl3.h"
@@ -46,6 +47,10 @@ namespace MySrt
 
 		static std::map<std::string, SortingWindow*>* SortingWindowList;
 	};
+}
+
+namespace MySrt {
+	void open_url(const std::string& url);
 }
 
 #endif
