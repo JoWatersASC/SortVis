@@ -111,6 +111,8 @@ namespace MySrt{
         }
     }
 
+    void RenderInputs() {}
+
     void RenderWindows() {
         ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
 
