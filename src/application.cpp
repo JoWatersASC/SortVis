@@ -1,4 +1,5 @@
 #include"application.h"
+#include"imgui_internal.h" //for debugging purposes, remove for build
 
 namespace MySrt{
     const ImGuiWindowFlags winFlags_ = (
@@ -6,8 +7,7 @@ namespace MySrt{
         ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoNav |
         ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_MenuBar
+        ImGuiWindowFlags_NoSavedSettings
     );
 
     std::map<std::string, bool> windows_closed;
@@ -37,15 +37,22 @@ namespace MySrt{
 
     //Place inside main loop
     void Run(){
-        ImVec2 displaySize = ImGui::GetIO().DisplaySize;
-        ImGui::SetNextWindowSize(displaySize);
-        ImGui::SetNextWindowPos({ 0, 0 });
-        ImGui::Begin("Application Window", NULL, winFlags_ | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar);
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Options"))
+            {
+                RenderMainMenuOptions();
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("My Links")) {
+                RenderMainMenuAbout();
+                ImGui::EndMenu();
+            }
+            ImGui::EndMainMenuBar();
+        }
 
-        RenderMainMenuBar();
+        RenderInputs();
         RenderWindows();
-
-        ImGui::End();
     }
 
     //Place after main loop
@@ -66,50 +73,41 @@ namespace MySrt{
     }
 
     void RenderMainMenuBar() {
-        if (ImGui::BeginMenuBar())
+
+    }
+    void RenderMainMenuOptions() {
+        if (ImGui::BeginMenu("Add Sorting Function"))
         {
-            if (ImGui::BeginMenu("Options"))
-            {
-                if (ImGui::BeginMenu("Add Sorting Function"))
+            for (auto it : sort_funcs) {
+                std::string sortFuncItem = it.first;
+
+                if (SWL->count(sortFuncItem)) continue;
+
+                if (ImGui::MenuItem(sortFuncItem.c_str()))
                 {
-                    for (auto it : sort_funcs) {
-                        std::string sortFuncItem = it.first;
-
-                        if (SWL->count(sortFuncItem)) continue;
-
-                        if (ImGui::MenuItem(sortFuncItem.c_str()))
-                        {
-                            windows_closed[sortFuncItem] = true;
-                            SortingWindow::SortingWindowList->operator[](sortFuncItem) =
-                                new SortingWindow({ 40 + SWL->size() * (winDim.x + 20), 180 },
-                                    sortFuncItem.c_str(), &windows_closed[sortFuncItem]);
-                        }
-                    }
-
-                    ImGui::EndMenu();
+                    windows_closed[sortFuncItem] = true;
+                    SortingWindow::SortingWindowList->operator[](sortFuncItem) =
+                        new SortingWindow({ 40 + SWL->size() * (winDim.x + 20), 180 },
+                            sortFuncItem.c_str(), &windows_closed[sortFuncItem]);
                 }
-                if (ImGui::BeginMenu("Reset"))
-                {
-
-                }
-
-                ImGui::EndMenu();
-            }
-            
-            if (ImGui::BeginMenu("About Me")) 
-            {
-                if (ImGui::MenuItem("GitHub")) 
-                {
-                    open_url("https://github.com/JoWatersASC");
-                }
-                if (ImGui::MenuItem("LinkedIn")) 
-                {
-                    open_url("https://www.linkedin.com/in/joshua-b-waters/");
-                }
-                ImGui::EndMenu();
             }
 
-            ImGui::EndMenuBar();
+            ImGui::EndMenu();
+        }
+        if (ImGui::MenuItem("Reset")){}
+    }
+    void RenderMainMenuAbout() {
+        if (ImGui::BeginMenu("About Me"))
+        {
+            if (ImGui::MenuItem("GitHub"))
+            {
+                open_url("https://github.com/JoWatersASC");
+            }
+            if (ImGui::MenuItem("LinkedIn"))
+            {
+                open_url("https://www.linkedin.com/in/joshua-b-waters/");
+            }
+            ImGui::EndMenu();
         }
     }
 
