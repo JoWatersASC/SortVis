@@ -32,8 +32,9 @@ namespace MySrt
 				throw std::runtime_error("Maximum number of windows created");
 		}
 	}
-	SortingWindow::SortingWindow(ImVec2 p, char* str, bool *isOpen) : pos(p), sortFunc(str), sortFuncString(str) {
+	SortingWindow::SortingWindow(ImVec2 p, const char* str, bool *isOpen) : pos(p),  sortFuncString(str) {
 		open = isOpen;
+		sortFunc = &sortFuncString[0];
 
 		if (SortingWindowList->size() == 0) {
 			SortingWindowList->operator[](std::string(sortFunc)) = this;
@@ -61,13 +62,17 @@ namespace MySrt
 
 	bool SortingWindow::Render(const ImVec2 dim, const ImGuiWindowFlags winFlags)
 	{
-		if (!*open) return false;
+		if (!*open) {
+			SortingWindowList->erase(sortFuncString);
+			return false;
+		}
 
 		ImGui::SetNextWindowSize(dim);
 		ImGui::SetNextWindowPos(pos);
 		
 		ImGui::Begin(sortFunc, open, winFlags);
 
+		//Menu Bar
 		{
 			if (ImGui::BeginMenuBar())
 			{
@@ -105,14 +110,6 @@ namespace MySrt
 							}
 						}
 					}
-
-					//if (ImGui::MenuItem("Insertion Sort"))	{ sortFunc = "Insertion Sort"; }
-					//if (ImGui::MenuItem("Selection Sort"))	{ sortFunc = "Selection Sort"; }
-					//if (ImGui::MenuItem("Bubble Sort"))		{ sortFunc = "Bubble Sort"; }
-					//if (ImGui::MenuItem("Merge Sort"))		{ sortFunc = "Merge Sort"; }
-					//if (ImGui::MenuItem("Quick Sort"))		{ sortFunc = "Quick Sort"; }
-					//if (ImGui::MenuItem("Heap Sort"))		{ sortFunc = "Heap Sort"; }
-
 					ImGui::EndMenu();
 				}
 
@@ -123,6 +120,10 @@ namespace MySrt
 		ImGui::End();
 
 		return true;
+	}
+
+	void SortingWindow::setList(const std::vector<int>& vect) {
+		list = vect;
 	}
 
 	ImVec2& SortingWindow::position() {

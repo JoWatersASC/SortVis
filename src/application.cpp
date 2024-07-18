@@ -21,18 +21,14 @@ namespace MySrt{
     //Place before main loop
     void Start() {
         cleaned = false;
-        winDim = { 300, 250 };
+        winDim = { 350, 275 };
 
         SortingWindow::SortingWindowList = new std::map<std::string, SortingWindow*>();
 
-        windows_closed["Insertion Sort"] = true;
         windows_closed["Selection Sort"] = true;
 
-        SortingWindow::SortingWindowList->operator[]("Insertion Sort") =
-            new SortingWindow({40, 180}, "Insertion Sort", &windows_closed["Insertion Sort"]);
-
         SortingWindow::SortingWindowList->operator[]("Selection Sort") =
-            new SortingWindow({ 380, 180 }, "Selection Sort", &windows_closed["Selection Sort"]);
+            new SortingWindow({40, 180}, "Selection Sort", &windows_closed["Selection Sort"]);
 
         SWL = SortingWindow::SortingWindowList;
 
@@ -46,31 +42,8 @@ namespace MySrt{
         ImGui::SetNextWindowPos({ 0, 0 });
         ImGui::Begin("Application Window", NULL, winFlags_ | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-        if (ImGui::BeginMainMenuBar()) 
-        {
-            if (ImGui::BeginMenu("Options")) {
-                if (ImGui::MenuItem("Sorting Function")) {
-                    // Handle opening a file
-                }
-                if (ImGui::MenuItem("Close")) {
-                    //*open = false;
-                }
-                ImGui::EndMenu();
-            }
-            ImGui::EndMainMenuBar();
-        }
-
-        {
-            ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar;
-
-            SWL_itr it = SWL->begin();
-            while (it != swlEnd) {
-                if (it->second->Render(winDim, winFlags))
-                    it++;
-                else
-                    break;
-            }
-        }
+        RenderMainMenuBar();
+        RenderWindows();
 
         ImGui::End();
     }
@@ -91,4 +64,78 @@ namespace MySrt{
         delete SortingWindow::SortingWindowList;
         cleaned = true;
     }
+
+    void RenderMainMenuBar() {
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("Sort")) {
+                Sort();
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Options"))
+            {
+                if (ImGui::BeginMenu("Add Sorting Function"))
+                {
+                    for (auto it : sort_funcs) {
+                        std::string sortFuncItem = it.first;
+
+                        if (SWL->count(sortFuncItem)) continue;
+
+                        if (ImGui::MenuItem(sortFuncItem.c_str()))
+                        {
+                            windows_closed[sortFuncItem] = true;
+                            SortingWindow::SortingWindowList->operator[](sortFuncItem) =
+                                new SortingWindow({ 40 + SWL->size() * (winDim.x + 20), 180 },
+                                    sortFuncItem.c_str(), &windows_closed[sortFuncItem]);
+                        }
+                    }
+
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Reset"))
+                {
+
+                }
+
+                ImGui::EndMenu();
+            }
+            
+            if (ImGui::BeginMenu("About Me")) 
+            {
+                if (ImGui::MenuItem("GitHub")) 
+                {
+                    open_url("https://github.com/JoWatersASC");
+                }
+                if (ImGui::MenuItem("LinkedIn")) 
+                {
+                    open_url("https://www.linkedin.com/in/joshua-b-waters/");
+                }
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMainMenuBar();
+        }
+    }
+
+    void RenderWindows() {
+        ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar;
+
+        SWL_itr it = SWL->begin();
+
+        int winIndex = 0;
+        while (it != swlEnd) {
+            auto currWindow = it->second;
+
+            ImVec2 pos(40 + winIndex * (20 + winDim.x), 180);
+            currWindow->position() = pos;
+            if (currWindow->Render(winDim, winFlags))
+                it++;
+            else
+                break;
+
+            winIndex++;
+        }
+    }
+
+    void Sort(){}
 }

@@ -36,10 +36,12 @@ namespace MySrt
 	public:
 		SortingWindow(ImVec2);
 		SortingWindow(ImVec2, char*);
-		SortingWindow(ImVec2, char*, bool*);
+		SortingWindow(ImVec2, const char*, bool*);
 
 		void Render(const ImVec2);
 		bool Render(const ImVec2, const ImGuiWindowFlags);
+
+		void setList(const std::vector<int>&);
 
 		ImVec2& position();
 		bool isOpen();

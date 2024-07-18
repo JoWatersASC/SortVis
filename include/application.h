@@ -4,4 +4,8 @@ namespace MySrt{
     void Start();
     void Run();
     void End();
+
+    void RenderMainMenuBar();
+    void RenderWindows();
+    void Sort();
 }
