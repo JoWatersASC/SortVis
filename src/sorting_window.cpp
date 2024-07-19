@@ -66,7 +66,7 @@ namespace MySrt
 		ImGui::End();
 	}
 
-	bool SortingWindow::Render(const ImVec2 dim, const ImGuiWindowFlags winFlags)
+	bool SortingWindow::Render(const ImGuiWindowFlags winFlags, bool& renderList)
 	{
 		if (!*open) {
 			SortingWindowList->erase(sortFuncString);
@@ -81,22 +81,20 @@ namespace MySrt
 		if(!RenderMenuBar()) 
 			return false;
 
-		//ImGui::BeginChild("Content Area", ImGui::GetWindowSize() - ImVec2(40, 20));
-		RenderWinList();
-		//ImGui::EndChild();
+		if (renderList) {
+			std::async(std::launch::async, &SortingWindow::RenderWinList, this);
+		}
 
 		ImGui::End();
 
 		return true;
 	}
 
-	void SortingWindow::setList() { setList(winStartList); }
-	void SortingWindow::setList(const std::vector<int>& vect) {
-		list = vect;
-	}
-
 	ImVec2& SortingWindow::position() {
 		return pos;
+	}
+	ImVec2& SortingWindow::dimension() {
+		return dim;
 	}
 	bool SortingWindow::isOpen() {
 		return open;
@@ -112,19 +110,7 @@ namespace MySrt {
 	bool SortingWindow::RenderMenuBar() {
 		if (ImGui::BeginMenuBar())
 		{
-			if (ImGui::BeginMenu("Options"))
-			{
-				if (ImGui::MenuItem("link"))
-				{
-					open_url("https://www.google.com");
-				}
-				if (ImGui::MenuItem("Close"))
-				{
-					*open = false;
-				}
-				ImGui::EndMenu();
-			}
-			if (ImGui::BeginMenu("Sorting Algorithm"))
+			if (ImGui::BeginMenu("Choose Sorting Algorithm"))
 			{
 				for (auto it : sort_funcs) {
 					std::string sortFuncItem = it.first;
@@ -155,54 +141,62 @@ namespace MySrt {
 	}
 
 	bool SortingWindow::RenderWinList() {
-		int size = list.size();
+		size_t size = list.size();
+		if (!size) return size;
 
 		ImVec2 barPos;
 		ImVec2 barDim; //barDim.y is max height of bar
 		ImVec2 barOffset; // offset of window decorations and padding
 
-		ImVec2 winPos = ImGui::GetWindowPos();
-		ImVec2 winMin = ImGui::GetWindowContentRegionMin(); // upper left corner of content region relative to window
-		ImVec2 winMax = ImGui::GetWindowContentRegionMax(); //lower right corner of content region relative to window
-		ImVec2 winDim = ImGui::GetContentRegionAvail(); // available size of window - decorations
+		ImVec2 contentRegion = ImGui::GetContentRegionAvail();
+		ImVec2 contentPadding(0, 0.7f * (dim.y - contentRegion.y)); // 1% of width and available content region offset from top
+		ImVec2 contentPos = pos + contentPadding;
+		ImVec2 contentDim = dim - contentPadding;
+
 
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
-		ImVec2 crs = ImGui::GetContentRegionAvail();
 
-		barOffset = ImVec2(0.01f * winMax.x, winMax.y - winDim.y); // 1% of width and available content region offset from top
-		barPos = winPos + barOffset;
-		barDim = (winMax - winMin) * ImVec2(0.05f, 0.1f);
+		//barOffset = ImVec2(0.01f * winMax.x, winMax.y - winDim.y); // 1% of width and available content region offset from top
+		//barPos = winPos + barOffset;
+		int listMax = getMax(list);
+		int listMin = getMin(list);
 
-		draw_list->AddRectFilled(barPos, barPos + barDim, ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)), 0, ImDrawFlags_RoundCornersNone);
+		barPos = contentPos + (contentDim * ImVec2(0.1f, 0.0f));
+		barDim = ImVec2(); // barDim.y is minimum size of a bar
+
+		for (int i = 0; i < list.size(); i++) {
+			barPos = barPos + barDim * ImVec2(1.0f, 0);
+			barDim = contentDim * ImVec2(0.8f / (float)list.size(), ((float)list[i] / listMax) * 0.95f);
+
+			printf("Content Dim: %0.3f, %0.3f | Current Bar Dim: %0.3f, %0.3f\n", contentDim.x, contentDim.y, barDim.x, barDim.y);
+
+			draw_list->AddRectFilled(barPos, barPos + barDim, ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)), 0, ImDrawFlags_RoundCornersNone);
+
+			////printf("\nItem Ratio: %0.4f\n", itemRatio);
+			//std::cout << barPos.x << ", " << "==>" << (float)list[i] << ", " << barDim.y << std::endl;
+			//std::cout << barPos.x << ", " << barPos.y << "==>" << contentPos.y << ", " << contentDim.y << std::endl;
+		}
 
 		return true;
 	}
 }
 
 //*******************************************************************************************************\\
-                                        Helper Functions
+                                        List Functions
 //*******************************************************************************************************\\
 
 namespace MySrt {
-	void open_url(const std::string& url) {
-#if defined(_WIN64)
-		system(("start " + url).c_str());
-#elif defined(__linux__)
-		system(("xdg-open " + url).c_str());
-#endif
-	}
+	void SortingWindow::setList() { setList(winStartList); }
+	void SortingWindow::setList(const std::vector<int>& vect) { list = vect; }
 
 	void SortingWindow::sortList() {
 		const std::function<void(std::vector<int>&)>* currSortFunc = &sort_funcs.at(sortFuncString);
+		//std::async(std::launch::async, *currSortFunc, std::ref(list));
 		currSortFunc->operator()(list);
 	}
 
 	void SortingWindow::printList() {
-		printf("[");
-		for (auto num : list) {
-			printf("%d, ", num);
-		}
-		printf("\b\b]\n");
+		print(list);
 	}
 }
 
@@ -216,6 +210,12 @@ ImVec2 operator-(const ImVec2& a, const ImVec2& b) {
 ImVec2 operator*(const ImVec2& vec, const ImVec2& factor) {
 	return	{ vec.x * factor.x, vec.y * factor.y };
 }
-ImVec2 operator*(const ImVec2& vec, int a) {
-	return	vec * ImVec2( a, a );
+ImVec2 operator*(const ImVec2& vec, float factor) {
+	return	vec * ImVec2( factor, factor );
+}
+ImVec2 operator/(const ImVec2& vec, const ImVec2& divisor) {
+	return { vec.x / divisor.x, vec.y / divisor.y };
+}
+ImVec2 operator/(const ImVec2& vec, float divisor) {
+	return vec / ImVec2(divisor, divisor);
 }

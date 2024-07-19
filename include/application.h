@@ -16,8 +16,6 @@ namespace MySrt{
     void RenderInputs();
     void RenderWindows();
     void Sort();
-    
-    static void SortThreads();
 
     void Reset(bool);
 }

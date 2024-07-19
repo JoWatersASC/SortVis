@@ -1,9 +1,8 @@
-#include<thread>
 #include"application.h"
 
 //Forward Declarations
 namespace MySrt {
-    static ImVec2 getWinDim(int numWindows, ImVec2 contentDim);
+    static ImVec2 getWinDim(size_t numWindows, ImVec2 contentDim);
 }
 //*******************************************************************************************************\\
                                         Application Variables
@@ -27,9 +26,11 @@ namespace MySrt {
     static int numItems = 10; //variable to be passed to windows
     static int numItems_ = 10; //variable to be edited with slider (ONLY EDIT IN WINDOW VECTOR MOD FUNCTIONS)
 
-    //Holds window values - which windows are open(by sorting algo) and dimensions of window 
     static std::map<std::string, bool> windows_open;
+    bool renderWinLists;
+    ImVec2 winRatio;
     ImVec2 winDim;
+    ImVec2 winContentDim;
 
     typedef std::map<std::string, SortingWindow*>::iterator SWL_itr;
     static std::map<std::string, SortingWindow*>* SWL;
@@ -51,7 +52,8 @@ namespace MySrt {
     //Place before main loop
     void Start() {
         cleaned = false;
-        winDim = { 350, 275 };
+        winRatio = { 400.0f / 1280.0f, 275.0f / 725.0f };
+        winDim = { 400, 275 };
         dspSize = ImGui::GetIO().DisplaySize;
 
         windows_open["Selection Sort"] = true;
@@ -75,6 +77,8 @@ namespace MySrt {
         dspSize.x -= 4; // leaves 2 pixels on either side
         dspSize.y -= 22; //leaves 2 pixels above(mainMenuBar is 18 pixels) and below
 
+        //printf("%0.5f\n", dspSize.y);
+
         RenderMainMenuBar();
 
         ImGui::SetNextWindowPos({ 2, 20 });
@@ -90,8 +94,8 @@ namespace MySrt {
     //Place after main loop
     void End() {
         SWL_itr it = SWL->begin();
-        int size = SWL->size();
-        int count = 0;
+        size_t size = SWL->size();
+        size_t count = 0;
 
         while (count < size && it != swlEnd) {
             delete it->second;
@@ -137,8 +141,11 @@ namespace MySrt {
                 {
                     windows_open[sortFuncItem] = true;
                     SortingWindow::SortingWindowList->operator[](sortFuncItem) =
-                        new SortingWindow({ 40 + SWL->size() * (winDim.x + 20), 180 },
-                            sortFuncItem.c_str(), &windows_open[sortFuncItem]);
+                        new SortingWindow({ 40 + (SWL->size() % 3) * (winDim.x + 20), 
+                            (SWL->size() > 3 ? 0.2f * winDim.y : 1.1f * winDim.y) },
+                            sortFuncItem.c_str(), 
+                            &windows_open[sortFuncItem]
+                        );
                 }
             }
 
@@ -195,13 +202,22 @@ namespace MySrt {
 
         SWL_itr it = SWL->begin();
 
-        int winIndex = 0;
+        size_t winIndex = 0;
         while (it != swlEnd) {
             auto currWindow = it->second;
+            if (!currWindow) continue;
 
-            ImVec2 pos(40 + winIndex * (20 + winDim.x), 180);
+            ImVec2 pos( 20 + (winIndex % 3) * (winDim.x + 20),
+                (winIndex < 3 ? winDim.y * winRatio.y : 1.1f * (winDim.y * winRatio.y) + winDim.y));
+            printf("%0.3f, %0.3f\n", winDim.x, winDim.y);
+            ImVec2 dim(dspSize * winRatio);
+
+            winDim = dim;
+
             currWindow->position() = pos;
-            if (currWindow->Render(winDim, winFlags))
+            currWindow->dimension() = dim;
+
+            if (currWindow->Render(winFlags, renderWinLists))
                 it++;
             else
                 break;
@@ -226,31 +242,28 @@ namespace MySrt{
     }
 
     void Reset(bool setNewVect) {
+        renderWinLists = true;
         if (setNewVect) {
             std::vector<int> newVect;
-            for (int i = 0; i < numItems; i++) newVect.push_back(generate() % (3 * numItems));
+            for (size_t i = 0; i < numItems; i++) newVect.push_back(generate() % (3 * numItems) + 1);
             
             SortingWindow::winStartList = newVect;
         }
 
         for (auto [winName, isOpen] : windows_open) {
-            SortingWindow* currSW= SWL->operator[](winName);
+            SortingWindow* currSW = SWL->operator[](winName);
 
-            if (isOpen) {
+            if (currSW && isOpen) {
                 currSW->setList();
-                currSW->printList();
             }
         }
-    }
-
-    static void SortThreads() {
-
     }
 }
 
 //Helper functions
 namespace MySrt{
-    static ImVec2 getWinDim(int numWindows, ImVec2 contentDim) {
-
+    void sortList(SortingWindow& currWin) {
+        std::function<void(std::vector<int>&)> currSortFunc = sort_funcs.at(currWin.sortFuncString);
+        currSortFunc(currWin.list);
     }
 }

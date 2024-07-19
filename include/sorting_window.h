@@ -2,7 +2,7 @@
 #define SORTING_WINDOW_H
 
 #include <chrono>
-#include <cstdlib>
+#include <future>
 
 #include"imgui.h"
 #include"imgui_impl_opengl3.h"
@@ -21,7 +21,7 @@
 namespace MySrt
 {
 	typedef std::chrono::high_resolution_clock HRC;
-	typedef int elemType;
+	typedef size_t elemType;
 
 	class SortingWindow {
 	private:
@@ -29,6 +29,8 @@ namespace MySrt
 		const char* sortFunc;
 		std::string sortFuncString;
 		ImVec2 pos;
+		ImVec2 dim;
+
 		HRC timer;
 		bool *open;
 
@@ -41,7 +43,7 @@ namespace MySrt
 		SortingWindow(ImVec2, const char*, bool*);
 
 		void Render(const ImVec2);
-		bool Render(const ImVec2, const ImGuiWindowFlags);
+		bool Render(const ImGuiWindowFlags, bool&);
 
 		void setList();
 		void setList(const std::vector<int>&);
@@ -49,23 +51,24 @@ namespace MySrt
 		void printList();
 
 		ImVec2& position();
+		ImVec2& dimension();
+		
 		bool isOpen();
+
 		friend bool colliding(const SortingWindow&, const SortingWindow&);
+		friend void sortList(SortingWindow&);
 
 		static std::vector<int> winStartList;
 		static std::map<std::string, SortingWindow*>* SortingWindowList;
 	};
 }
 
-namespace MySrt {
-	void open_url(const std::string& url);
-}
-
-
 //experimental imvec2 algebra operators
 ImVec2 operator+(const ImVec2& a, const ImVec2& b);
 ImVec2 operator-(const ImVec2& a, const ImVec2& b);
 ImVec2 operator*(const ImVec2& vec, const ImVec2& factor);
-ImVec2 operator*(const ImVec2& vec, int a);
+ImVec2 operator*(const ImVec2& vec, float factor);
+ImVec2 operator/(const ImVec2& vec, const ImVec2& divisor);
+ImVec2 operator/(const ImVec2& vec, float divisor);
 
 #endif
