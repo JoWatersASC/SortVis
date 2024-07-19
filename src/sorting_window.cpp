@@ -76,7 +76,7 @@ namespace MySrt
 		ImGui::SetNextWindowSize(dim);
 		ImGui::SetNextWindowPos(pos);
 		
-		ImGui::Begin(sortFunc, open, winFlags - ImGuiWindowFlags_NoResize);
+		ImGui::Begin(sortFunc, open, winFlags);
 
 		if(!RenderMenuBar()) 
 			return false;
