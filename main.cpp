@@ -82,6 +82,12 @@ int main(int argc, char** argv) {
 
 			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
+			ImDrawList* draw_list = ImGui::GetWindowDrawList();
+			ImVec2 winMin = ImGui::GetWindowContentRegionMin(); // upper left corner of content region
+			ImVec2 winMax = ImGui::GetWindowContentRegionMax();
+			draw_list->AddRectFilled(winMin, winMax, ImGui::GetColorU32(IM_COL32(0, 0, 0, 255)));
+			printf("(%.2f, %.2f), (%.2f, %.2f)\n", winMin.x, winMin.y, winMax.x, winMax.y);
+
 			ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
 			ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
 			ImGui::Checkbox("Another Window", &show_another_window);

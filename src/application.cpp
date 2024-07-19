@@ -1,7 +1,10 @@
+#include<thread>
 #include"application.h"
 
-//#include"imgui_internal.h" //for debugging purposes, remove for build
-
+//Forward Declarations
+namespace MySrt {
+    static ImVec2 getWinDim(int numWindows, ImVec2 contentDim);
+}
 //*******************************************************************************************************\\
                                         Application Variables
 //*******************************************************************************************************\\
@@ -9,9 +12,9 @@
 namespace MySrt {
     static const ImGuiWindowFlags winFlags_ = (
         ImGuiWindowFlags_NoDecoration |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoNav |
-        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoMove       |
+        ImGuiWindowFlags_NoNav        |
+        ImGuiWindowFlags_NoCollapse   |
         ImGuiWindowFlags_NoSavedSettings
         );
     static const ImGuiSliderFlags sliderFlags = (
@@ -21,8 +24,8 @@ namespace MySrt {
 
     ImVec2 dspSize;
 
-    static int numItems = 2; //variable to be passed to windows
-    static int numItems_ = 2; //variable to be edited with slider (ONLY EDIT IN WINDOW VECTOR MOD FUNCTIONS)
+    static int numItems = 10; //variable to be passed to windows
+    static int numItems_ = 10; //variable to be edited with slider (ONLY EDIT IN WINDOW VECTOR MOD FUNCTIONS)
 
     //Holds window values - which windows are open(by sorting algo) and dimensions of window 
     static std::map<std::string, bool> windows_open;
@@ -34,7 +37,7 @@ namespace MySrt {
 
     //Random number generator
     static std::random_device rand_dev;
-    static std::mt19937 generate(rand_dev);
+    static std::mt19937 generate(rand_dev());
 
     //Verifies that End() has been called after Start()
     bool cleaned;
@@ -60,6 +63,10 @@ namespace MySrt {
         SWL = SortingWindow::SortingWindowList;
 
         swlEnd = SWL->end();
+
+        Reset(true);
+
+        SWL->operator[]("Selection Sort")->printList();
     }
 
     //Place inside main loop
@@ -99,10 +106,10 @@ namespace MySrt {
 }
 
 //*******************************************************************************************************\\
-                                  Render Application Window Items Functions
+                                    Main Menu Render Functions
 //*******************************************************************************************************\\
     
-namespace MySrt{
+namespace MySrt {
     void RenderMainMenuBar() {
         if (ImGui::BeginMainMenuBar())
         {
@@ -137,7 +144,7 @@ namespace MySrt{
 
             ImGui::EndMenu();
         }
-        if (ImGui::MenuItem("Reset")){}
+        if (ImGui::MenuItem("Reset")) {}
     }
     void RenderMainMenuAbout() {
         if (ImGui::BeginMenu("About Me"))
@@ -153,22 +160,34 @@ namespace MySrt{
             ImGui::EndMenu();
         }
     }
+}
 
+//*******************************************************************************************************\\
+                                    Content Area Render Functions
+//*******************************************************************************************************\\
+
+namespace MySrt {
     void RenderInputs() {
         ImGui::SliderInt("Value", &numItems_, 2, 50000, "%d", sliderFlags); ImGui::SameLine();
 
-        //if (ImGui::BeginTooltip()) 
-        //{
-        //    const char* helpText = "\"Ctrl + click to edit manually\"";
-        //    ImGui::TextUnformatted(helpText);
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            const char* helpText = "\"Ctrl + click\" to edit manually";
+            ImGui::TextUnformatted(helpText);
 
-        //    ImGui::EndTooltip();
-        //} ImGui::SameLine();
+            ImGui::EndTooltip();
+        } ImGui::SameLine();
 
-        if (ImGui::Button("Confirm")) { numItems = numItems_; }
-        if (ImGui::Button("Reset Windows")) {
-
+        if (ImGui::Button("Confirm")) {
+            numItems = numItems_;
+            Reset(true);
         }
+
+        if (ImGui::Button("Reset Windows")) {
+            Reset(false);
+        }ImGui::SameLine();
+        if (ImGui::Button("Sort")) Sort();
     }
 
     void RenderWindows() {
@@ -190,25 +209,48 @@ namespace MySrt{
             winIndex++;
         }
     }
+}
 
-    void Sort(){}
+//*******************************************************************************************************\\
+                                        Event Handler Functions
+//*******************************************************************************************************\\
+
+namespace MySrt{
+    void Sort(){
+        for (auto [winName, isOpen] : windows_open) {
+            if (isOpen) {
+                SortingWindow* currSW = SWL->operator[](winName);
+                currSW->sortList();
+            }
+        }
+    }
 
     void Reset(bool setNewVect) {
         if (setNewVect) {
             std::vector<int> newVect;
+            for (int i = 0; i < numItems; i++) newVect.push_back(generate() % (3 * numItems));
             
-            for (int i = 0; i < numItems; i++) {
-                newVect.push_back(generate() % (3 * numItems / 2));
-            }
-
             SortingWindow::winStartList = newVect;
-            for (auto [winName, isOpen] : windows_open) {
+        }
 
+        for (auto [winName, isOpen] : windows_open) {
+            SortingWindow* currSW= SWL->operator[](winName);
+
+            if (isOpen) {
+                currSW->setList();
+                currSW->printList();
             }
-            return;
         }
-        else {
+    }
 
-        }
+    static void SortThreads() {
+
+    }
+}
+
+//Helper functions
+namespace MySrt{
+    static ImVec2 getWinDim(int numWindows, ImVec2 contentDim) {
+
     }
 }

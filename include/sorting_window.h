@@ -33,7 +33,7 @@ namespace MySrt
 		bool *open;
 
 		bool RenderMenuBar();
-		bool RenderList();
+		bool RenderWinList();
 
 	public:
 		SortingWindow(ImVec2);
@@ -43,7 +43,10 @@ namespace MySrt
 		void Render(const ImVec2);
 		bool Render(const ImVec2, const ImGuiWindowFlags);
 
+		void setList();
 		void setList(const std::vector<int>&);
+		void sortList();
+		void printList();
 
 		ImVec2& position();
 		bool isOpen();
@@ -57,5 +60,12 @@ namespace MySrt
 namespace MySrt {
 	void open_url(const std::string& url);
 }
+
+
+//experimental imvec2 algebra operators
+ImVec2 operator+(const ImVec2& a, const ImVec2& b);
+ImVec2 operator-(const ImVec2& a, const ImVec2& b);
+ImVec2 operator*(const ImVec2& vec, const ImVec2& factor);
+ImVec2 operator*(const ImVec2& vec, int a);
 
 #endif
