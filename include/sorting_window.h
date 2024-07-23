@@ -22,6 +22,8 @@ namespace MySrt
 {
 	typedef std::chrono::high_resolution_clock HRC;
 	typedef size_t elemType;
+	inline std::map<std::string, bool> windows_open;
+
 
 	class SortingWindow {
 	private:
@@ -53,6 +55,7 @@ namespace MySrt
 		ImVec2& position();
 		ImVec2& dimension();
 		
+		std::string getName();
 		bool isOpen();
 
 		friend bool colliding(const SortingWindow&, const SortingWindow&);

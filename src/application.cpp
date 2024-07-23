@@ -26,7 +26,6 @@ namespace MySrt {
     static int numItems = 10; //variable to be passed to windows
     static int numItems_ = 10; //variable to be edited with slider (ONLY EDIT IN WINDOW VECTOR MOD FUNCTIONS)
 
-    static std::map<std::string, bool> windows_open;
     bool renderWinLists;
     ImVec2 winRatio;
     ImVec2 winDim;
@@ -40,8 +39,10 @@ namespace MySrt {
     static std::random_device rand_dev;
     static std::mt19937 generate(rand_dev());
 
+    Uint32 lastTime, currentTime;
     //Verifies that End() has been called after Start()
     bool cleaned;
+    std::thread sortThread;
 }
 
 //*******************************************************************************************************\\
@@ -69,6 +70,42 @@ namespace MySrt {
         Reset(true);
 
         SWL->operator[]("Selection Sort")->printList();
+        lastTime = SDL_GetTicks();
+    }
+
+
+    void Update(SDL_Window* window) {
+        currentTime = SDL_GetTicks();
+        float deltaTime = (currentTime - lastTime) / 1000.0f;
+        lastTime = currentTime;
+    }
+    void Draw(SDL_Window* window, ImGuiIO& io) {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+
+        dspSize = ImGui::GetIO().DisplaySize;
+        dspSize.x -= 4; // leaves 2 pixels on either side
+        dspSize.y -= 22; //leaves 2 pixels above(mainMenuBar is 18 pixels) and below
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+        RenderMainMenuBar();
+
+        ImGui::SetNextWindowPos({ 2, 20 });
+        ImGui::SetNextWindowSize(dspSize);
+        ImGui::Begin("Content Window", NULL, winFlags_ | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+        RenderInputs();
+        RenderWindows();
+
+        ImGui::End();
+        ImGui::Render();
+
+        glViewport(0, 0, (size_t)io.DisplaySize.x, (size_t)io.DisplaySize.y);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        SDL_GL_SwapWindow(window);
     }
 
     //Place inside main loop
@@ -76,8 +113,6 @@ namespace MySrt {
         dspSize = ImGui::GetIO().DisplaySize;
         dspSize.x -= 4; // leaves 2 pixels on either side
         dspSize.y -= 22; //leaves 2 pixels above(mainMenuBar is 18 pixels) and below
-
-        //printf("%0.5f\n", dspSize.y);
 
         RenderMainMenuBar();
 
@@ -194,22 +229,27 @@ namespace MySrt {
         if (ImGui::Button("Reset Windows")) {
             Reset(false);
         }ImGui::SameLine();
-        if (ImGui::Button("Sort")) Sort();
+        if (ImGui::Button("Sort")) {
+            if(sortThread.joinable()) sortThread.join();
+            sortThread = std::thread(Sort);
+        }
     }
 
     void RenderWindows() {
         ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
 
-        SWL_itr it = SWL->begin();
-
         size_t winIndex = 0;
-        while (it != swlEnd) {
-            auto currWindow = it->second;
-            if (!currWindow) continue;
+
+        for (auto [winName, isOpen] : windows_open) {
+            auto currWindow = (*SWL)[winName];
+
+            if (!isOpen || !currWindow) {
+                continue;
+            }
 
             ImVec2 pos( 20 + (winIndex % 3) * (winDim.x + 20),
                 (winIndex < 3 ? winDim.y * winRatio.y : 1.1f * (winDim.y * winRatio.y) + winDim.y));
-            printf("%0.3f, %0.3f\n", winDim.x, winDim.y);
+
             ImVec2 dim(dspSize * winRatio);
 
             winDim = dim;
@@ -217,10 +257,9 @@ namespace MySrt {
             currWindow->position() = pos;
             currWindow->dimension() = dim;
 
-            if (currWindow->Render(winFlags, renderWinLists))
-                it++;
-            else
-                break;
+            if (!currWindow->Render(winFlags, renderWinLists)) {
+                return;
+            }
 
             winIndex++;
         }
@@ -233,10 +272,18 @@ namespace MySrt {
 
 namespace MySrt{
     void Sort(){
+        std::map<std::string, std::thread> threads;
+
         for (auto [winName, isOpen] : windows_open) {
             if (isOpen) {
                 SortingWindow* currSW = SWL->operator[](winName);
-                currSW->sortList();
+                threads[winName] = std::thread(&SortingWindow::sortList, currSW);
+            }
+        }
+
+        for (auto [winName, isOpen] : windows_open) {
+            if (isOpen) {
+                threads[winName].join();
             }
         }
     }
@@ -262,8 +309,8 @@ namespace MySrt{
 
 //Helper functions
 namespace MySrt{
-    void sortList(SortingWindow& currWin) {
+    /*void sortList(SortingWindow& currWin) {
         std::function<void(std::vector<int>&)> currSortFunc = sort_funcs.at(currWin.sortFuncString);
         currSortFunc(currWin.list);
-    }
+    }*/
 }

@@ -6,6 +6,8 @@
 
 namespace MySrt{
     void Start();
+    void Update(SDL_Window* window);
+    void Draw(SDL_Window* window, ImGuiIO& io);
     void Run();
     void End();
 

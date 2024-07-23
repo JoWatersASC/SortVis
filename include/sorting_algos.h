@@ -2,6 +2,7 @@
 #define SORTING_ALGOS_H
 
 #include<thread>
+#include<mutex>
 #include<memory>
 #include<stack>
 #include<map>
@@ -16,6 +17,7 @@ namespace MySrt {
 
 	template<class T>
 	void bubbleSort(std::vector<T>&);
+	static std::mutex mtx;
 
 	template<class T>
 	void selectionSort(std::vector<T>&);
@@ -117,8 +119,8 @@ namespace MySrt
 			while (j > 0 && vect[j] < vect[j - 1]) {
 				std::swap(vect[j], vect[j - 1]);
 				j--;
-				waitTime(vect);
 			}
+			waitTime(vect);
 		}
 	}
 
@@ -132,12 +134,13 @@ namespace MySrt
 		size_t size = vect.size();
 		if (size <= 1) return;
 
-		for (size_t sublistSize = 1; sublistSize < size - 1; sublistSize *= 2) {
-			for (size_t sublistIndex = 0; sublistIndex < size - 1; sublistIndex += sublistSize) {
+		for (size_t sublistSize = 1; sublistSize <= size - 1; sublistSize *= 2) {
+			for (size_t sublistIndex = 0; sublistIndex < size - 1; sublistIndex += 2 * sublistSize) {
 				size_t mid = std::min(sublistSize + sublistIndex - 1, size - 1);
 				size_t end = std::min(sublistIndex + 2 * sublistSize - 1, size - 1);
 
 				mergeI(vect, sublistIndex, mid, end);
+				waitTime(vect);
 			}
 		}
 
@@ -145,13 +148,14 @@ namespace MySrt
 
 	template<class T>
 	void heapSort(std::vector<T>& vect) {
+		//std::lock_guard<std::mutex> guard(mtx);
 		const size_t size = vect.size();
 
-		for (size_t i = size / 2 - 1; i >= 0; i--) {
+		for (int i = size / 2 - 1; i >= 0; i--) {
 			heapify(vect, size, i);
 		}
 
-		for (size_t i = size - 1; i > 0; i--) {
+		for (int i = size - 1; i > 0; i--) {
 			std::swap(vect[i], vect[0]);
 			waitTime(vect);
 
@@ -215,24 +219,31 @@ namespace MySrt {
 	void mergeI(std::vector<T>& vect, size_t l, size_t m, size_t r) {
 		size_t i = 0, j = 0, k = l;
 
-		std::vector<T> llist(vect.begin() + l, vect.begin() + m);
-		std::vector<T> rlist(vect.begin() + m, vect.begin() + r);
+		std::vector<T> llist(vect.begin() + l, vect.begin() + m + 1);
+		std::vector<T> rlist(vect.begin() + m + 1, vect.begin() + r + 1);
 		size_t llistSize = llist.size();
 		size_t rlistSize = rlist.size();
 
 		while (i < llistSize && j < rlistSize) {
 			if (llist[i] < rlist[j]) {
-				vect[k++] = llist[i++];
+				vect[k] = llist[i];
+				i++;
 			}
 			else {
-				vect[k++] = rlist[j++];
+				vect[k] = rlist[j];
+				j++;
 			}
+			k++;
 		}
 		while (i < llistSize) {
-			vect[k++] = llist[i++];
+			vect[k] = llist[i];
+			k++;
+			i++;
 		}
 		while (j < rlistSize) {
-			vect[k++] = rlist[j++];
+			vect[k] = rlist[j];
+			k++;
+			j++;
 		}
 	}
 	template<class T>
@@ -253,7 +264,6 @@ namespace MySrt {
 				j++;
 			}
 			k++;
-			waitTime(vect);
 		}
 
 		while (i < left.size()) {
@@ -324,15 +334,15 @@ namespace MySrt {
 		size_t right = maxItemIndex * 2 + 2;
 		size_t newMaxItemIndex = maxItemIndex;
 		
-		if (left < size &&  vect[left]  > vect[maxItemIndex]) {
+		if (left < size &&  vect[left]  > vect[newMaxItemIndex]) {
 			newMaxItemIndex = left;
 		}
-		if (right < size && vect[right] > vect[maxItemIndex]) {
+		if (right < size && vect[right] > vect[newMaxItemIndex]) {
 			newMaxItemIndex = right;
 		}
 		if (newMaxItemIndex != maxItemIndex) {
 			std::swap(vect[maxItemIndex], vect[newMaxItemIndex]);
-			waitTime(vect);
+			//waitTime(vect);
 
 			heapify(vect, size, newMaxItemIndex);
 		}
@@ -349,6 +359,12 @@ namespace MySrt {
 		}
 		else if (size <= 20) {
 			std::this_thread::sleep_for(200ms);
+		}
+		else if (size <= 10000) {
+			std::this_thread::sleep_for(2ms);
+		}
+		else {
+			std::this_thread::sleep_for(500us);
 		}
 	}
 }

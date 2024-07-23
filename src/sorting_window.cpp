@@ -81,9 +81,7 @@ namespace MySrt
 		if(!RenderMenuBar()) 
 			return false;
 
-		if (renderList) {
-			std::async(std::launch::async, &SortingWindow::RenderWinList, this);
-		}
+		RenderWinList();
 
 		ImGui::End();
 
@@ -96,6 +94,7 @@ namespace MySrt
 	ImVec2& SortingWindow::dimension() {
 		return dim;
 	}
+	std::string SortingWindow::getName() { return sortFuncString; }
 	bool SortingWindow::isOpen() {
 		return open;
 	}
@@ -119,11 +118,18 @@ namespace MySrt {
 						if (ImGui::MenuItem(sortFuncItem.c_str()))
 						{
 							SortingWindowList->erase(sortFuncString);
-
+							windows_open[sortFuncString] = false;
+							windows_open.erase(sortFuncString);
+							
 							sortFuncString = sortFuncItem;
 							sortFunc = sortFuncString.c_str();
 
+							windows_open[sortFuncString] = true;
+
+
 							SortingWindowList->operator[](sortFuncString) = this;
+
+							//printf("%s\n", sortFuncString.c_str());
 
 							ImGui::EndMenu();
 							ImGui::EndMenuBar();
@@ -158,17 +164,16 @@ namespace MySrt {
 
 		//barOffset = ImVec2(0.01f * winMax.x, winMax.y - winDim.y); // 1% of width and available content region offset from top
 		//barPos = winPos + barOffset;
-		int listMax = getMax(list);
-		int listMin = getMin(list);
+		float listMax = getMax(list);
+		float listMin = getMin(list);
+		
 
-		barPos = contentPos + (contentDim * ImVec2(0.1f, 0.0f));
+		barPos = contentPos + (contentDim * ImVec2(0.05f, 0.0f));
 		barDim = ImVec2(); // barDim.y is minimum size of a bar
 
 		for (int i = 0; i < list.size(); i++) {
 			barPos = barPos + barDim * ImVec2(1.0f, 0);
-			barDim = contentDim * ImVec2(0.8f / (float)list.size(), ((float)list[i] / listMax) * 0.95f);
-
-			printf("Content Dim: %0.3f, %0.3f | Current Bar Dim: %0.3f, %0.3f\n", contentDim.x, contentDim.y, barDim.x, barDim.y);
+			barDim = contentDim * ImVec2(0.9f / (float)list.size(), ((float)list[i] / listMax) * 0.95f);
 
 			draw_list->AddRectFilled(barPos, barPos + barDim, ImGui::GetColorU32(IM_COL32(0, 255, 0, 255)), 0, ImDrawFlags_RoundCornersNone);
 
@@ -190,8 +195,8 @@ namespace MySrt {
 	void SortingWindow::setList(const std::vector<int>& vect) { list = vect; }
 
 	void SortingWindow::sortList() {
+		std::cerr << list.size() << std::endl;
 		const std::function<void(std::vector<int>&)>* currSortFunc = &sort_funcs.at(sortFuncString);
-		//std::async(std::launch::async, *currSortFunc, std::ref(list));
 		currSortFunc->operator()(list);
 	}
 
