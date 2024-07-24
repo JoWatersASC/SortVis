@@ -11,7 +11,9 @@ Provides a visualization of common sorting algorithms.
 - Quick sort (iterative and recursive)
 - Heap sort
 
-Can choose which sorting algorithms to see working side by side and compare speeds as well as set the amount of elements to sort. (To see algorithms at raw speed, change waitOn to false in sorting_algos.h or change the duration of the thread sleep in waitTime() in sorting_algos.h)
+Can choose which sorting algorithms to see working side by side and compare speeds as well as set the amount of elements to sort. Changing the duration of the thread's sleep in the waitTime() function in sorting_algos.h will slow down or speed up sorting time, allowing for better visualization.
+
+This project was created as a learning exercise in c++ gui design with ImGui and is my first time working with gui's and threading in c++.
 
 ## Dependencies
 
