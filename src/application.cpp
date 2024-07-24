@@ -239,6 +239,7 @@ namespace MySrt {
         ImGuiWindowFlags winFlags = winFlags_ - ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar;
 
         size_t winIndex = 0;
+        ImVec2 appSize = ImGui::GetWindowSize();
 
         for (auto [winName, isOpen] : windows_open) {
             auto currWindow = (*SWL)[winName];
@@ -247,8 +248,11 @@ namespace MySrt {
                 continue;
             }
 
-            ImVec2 pos( 20 + (winIndex % 3) * (winDim.x + 20),
-                (winIndex < 3 ? winDim.y * winRatio.y : 1.1f * (winDim.y * winRatio.y) + winDim.y));
+            float xOffset = 20 * appSize.x / 1280.0f;
+            float yOffset = 40 * appSize.y / 725.0f;
+
+            ImVec2 pos( xOffset + (winIndex % 3) * (appSize.x * winRatio.x + xOffset),
+                (winIndex < 3 ? 60 + yOffset : appSize.y * winRatio.y + yOffset * 3.5f));
 
             ImVec2 dim(dspSize * winRatio);
 

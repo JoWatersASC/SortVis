@@ -66,8 +66,6 @@ namespace MySrt {
 
 	//Threading helper function, proportional to vector size
 	static void waitTime(size_t s = 0);
-	static void waitSwap();
-	static void waitCompare();
 
 	static bool waitOn = true;
 }
@@ -448,21 +446,6 @@ namespace MySrt {
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(100ns);
 	}
-	//static void waitSwap() {
-	//	if (!waitOn) return;
-	//	using namespace std::chrono_literals;
-	//	std::this_thread::sleep_for(350ns);
-	//}
-	//static void waitCompare() {
-	//	if (!waitOn) return;
-	//	using namespace std::chrono_literals;
-	//	std::this_thread::sleep_for(100ns);
-	//}
-	//static void waitAssign() {
-	//	if (!waitOn) return;
-	//	using namespace std::chrono_literals;
-	//	std::this_thread::sleep_for(150ns);
-	//}
 }
 
 //--------------------------

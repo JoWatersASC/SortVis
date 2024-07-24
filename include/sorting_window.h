@@ -23,7 +23,11 @@ namespace MySrt
 	typedef std::chrono::high_resolution_clock HRC;
 	typedef size_t elemType;
 	inline std::map<std::string, bool> windows_open;
-
+	enum class window_state {
+		UNSORTED,
+		SORTING,
+		SORTED
+	};
 
 	class SortingWindow {
 	private:
@@ -32,12 +36,15 @@ namespace MySrt
 		std::string sortFuncString;
 		ImVec2 pos;
 		ImVec2 dim;
-
-		HRC timer;
 		bool *open;
+
+		window_state state;
+
+		std::chrono::duration<double, std::nano> duration;
 
 		bool RenderMenuBar();
 		bool RenderWinList();
+		bool RenderDuration();
 
 	public:
 		SortingWindow(ImVec2);

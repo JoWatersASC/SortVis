@@ -11,8 +11,10 @@ namespace MySrt
 	std::vector<int>					   SortingWindow::winStartList;
 	std::map<std::string, SortingWindow*>* SortingWindow::SortingWindowList;
 
-    SortingWindow::SortingWindow(ImVec2 p) : pos(p){
+    SortingWindow::SortingWindow(ImVec2 p) : pos(p) {
 		*open = true;
+		state = window_state::UNSORTED;
+
 		if (!SortingWindowList || SortingWindowList->size() > 0)
 			throw;
 
@@ -23,6 +25,7 @@ namespace MySrt
 	}
 	SortingWindow::SortingWindow(ImVec2 p, char* str) : pos(p) , sortFunc(str), sortFuncString(str) {
 		*open = true;
+		state = window_state::UNSORTED;
 
 		if (!SortingWindowList || SortingWindowList->size() == 0) {
 			(*SortingWindowList)[std::string(sortFunc)] = this;
@@ -41,6 +44,7 @@ namespace MySrt
 	SortingWindow::SortingWindow(ImVec2 p, const char* str, bool *isOpen) : pos(p),  sortFuncString(str) {
 		open = isOpen;
 		sortFunc = &sortFuncString[0];
+		state = window_state::UNSORTED;
 
 		if (SortingWindowList->size() == 0) {
 			SortingWindowList->operator[](std::string(sortFunc)) = this;
@@ -82,6 +86,9 @@ namespace MySrt
 			return false;
 
 		RenderWinList();
+
+		if (state != window_state::UNSORTED)
+			RenderDuration();
 
 		ImGui::End();
 
@@ -155,14 +162,12 @@ namespace MySrt {
 		ImVec2 barOffset; // offset of window decorations and padding
 
 		ImVec2 contentRegion = ImGui::GetContentRegionAvail();
-		ImVec2 contentPadding(0, 0.7f * (dim.y - contentRegion.y)); // 1% of width and available content region offset from top
+		ImVec2 contentPadding(0, 0.7f * (dim.y - contentRegion.y)); //available content region offset from top
 		ImVec2 contentPos = pos + contentPadding;
 		ImVec2 contentDim = dim - contentPadding;
 
-
 		ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-		//barOffset = ImVec2(0.01f * winMax.x, winMax.y - winDim.y); // 1% of width and available content region offset from top
 		//barPos = winPos + barOffset;
 		float listMax = getMax(list);
 		float listMin = getMin(list);
@@ -184,6 +189,49 @@ namespace MySrt {
 
 		return true;
 	}
+
+	bool SortingWindow::RenderDuration() {
+		if (state == window_state::UNSORTED) return false;
+		std::string durationText;
+		std::string suffix = "ns";
+
+		if (duration.count() >= 1000000) {
+			std::chrono::duration<double, std::milli> duration_ms(duration);
+
+			durationText = std::to_string(duration_ms.count());
+			durationText.erase(durationText.end() - 3, durationText.end());
+			suffix = "ms";
+		}
+		else if(duration.count() >= 1000) {
+			std::chrono::duration<double, std::micro> duration_us(duration);
+
+			durationText = std::to_string(duration_us.count());
+			durationText.erase(durationText.end() - 3, durationText.end());
+			suffix = "us";
+		}
+		else{
+			durationText = std::to_string(duration.count());
+			durationText.erase(durationText.end() - 3, durationText.end());
+			suffix = "ns";
+		}
+
+		if (state == window_state::SORTING) {
+			durationText = "Execution Time: " + durationText + suffix;
+		}
+		else if (state == window_state::SORTED) {
+			durationText = sortFuncString + " sorted " + std::to_string(list.size()) + " elements in " + durationText + suffix;
+		}
+
+		auto winDim = ImGui::GetWindowSize();
+		auto textWidth = ImGui::CalcTextSize(durationText.c_str()).x;
+
+		ImGui::SetCursorPosX((winDim.x - textWidth) * 0.5f);
+		ImGui::SetCursorPosY(winDim.y * 0.95f);
+
+		ImGui::Text(durationText.c_str());
+
+		return true;
+	}
 }
 
 //*******************************************************************************************************\\
@@ -196,9 +244,22 @@ namespace MySrt {
 
 	
 	void SortingWindow::sortList() {
-		std::cerr << list.size() << std::endl;
+		state = window_state::SORTING;
+		duration = std::chrono::duration<double, std::nano>::zero();
+
+		std::thread timer([this]() {
+			auto start = HRC::now();
+			while (state != window_state::SORTED) {
+				duration = HRC::now() - start;
+			}
+		});
+
 		const std::function<void(std::vector<int>&)>* currSortFunc = &sort_funcs.at(sortFuncString);
 		currSortFunc->operator()(list);
+
+		state = window_state::SORTED;
+
+		if(timer.joinable()) timer.join();
 	}
 
 	void SortingWindow::printList() {
