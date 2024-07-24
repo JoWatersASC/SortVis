@@ -452,9 +452,6 @@ namespace MySrt {
 //Array of sorting functions
 //--------------------------
 namespace MySrt {
-	//DOES NOT WORK IN LINUX
-	//template<class T>
-	//extern const std::map<std::string, std::function<void(std::vector<T>&)>> sort_funcs;
 	extern const std::map<std::string, std::function<void(std::vector<int>&)>> sort_funcs;
 }
 

@@ -192,27 +192,27 @@ namespace MySrt {
 
 	bool SortingWindow::RenderDuration() {
 		if (state == window_state::UNSORTED) return false;
-		std::string durationText;
+		std::string durationText = "0";
 		std::string suffix = "ns";
 
 		if (duration.count() >= 1000000) {
+			std::chrono::duration<double> duration_s(duration);
+
+			durationText = std::to_string(duration_s.count());
+			durationText.erase(durationText.end() - 3, durationText.end());
+			suffix = "s";
+		}
+		else if(duration.count() >= 1000) {
 			std::chrono::duration<double, std::milli> duration_ms(duration);
 
 			durationText = std::to_string(duration_ms.count());
 			durationText.erase(durationText.end() - 3, durationText.end());
 			suffix = "ms";
 		}
-		else if(duration.count() >= 1000) {
-			std::chrono::duration<double, std::micro> duration_us(duration);
-
-			durationText = std::to_string(duration_us.count());
-			durationText.erase(durationText.end() - 3, durationText.end());
-			suffix = "us";
-		}
-		else{
+		else if(duration.count() >= 1){
 			durationText = std::to_string(duration.count());
 			durationText.erase(durationText.end() - 3, durationText.end());
-			suffix = "ns";
+			suffix = "us";
 		}
 
 		if (state == window_state::SORTING) {
@@ -245,7 +245,7 @@ namespace MySrt {
 	
 	void SortingWindow::sortList() {
 		state = window_state::SORTING;
-		duration = std::chrono::duration<double, std::nano>::zero();
+		duration = std::chrono::duration<double, std::micro>::zero();
 
 		std::thread timer([this]() {
 			auto start = HRC::now();

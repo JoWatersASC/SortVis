@@ -40,7 +40,7 @@ namespace MySrt
 
 		window_state state;
 
-		std::chrono::duration<double, std::nano> duration;
+		std::chrono::duration<double, std::micro> duration;
 
 		bool RenderMenuBar();
 		bool RenderWinList();
