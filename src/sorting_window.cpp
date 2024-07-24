@@ -194,6 +194,7 @@ namespace MySrt {
 	void SortingWindow::setList() { setList(winStartList); }
 	void SortingWindow::setList(const std::vector<int>& vect) { list = vect; }
 
+	
 	void SortingWindow::sortList() {
 		std::cerr << list.size() << std::endl;
 		const std::function<void(std::vector<int>&)>* currSortFunc = &sort_funcs.at(sortFuncString);
