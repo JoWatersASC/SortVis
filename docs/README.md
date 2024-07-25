@@ -1,7 +1,7 @@
 # SortVis
 
 ## About
-Provides a visualization of common sorting algorithms. 
+Provides a visualization of common sorting algorithms using ImGui, SDL2, and OpenGL. This project was created mostly as a learning exercise in c++ gui design by extending a few previously written sorting algorithms and is my first time working with gui's and threading in c++.
 ![Sorting Visualization](./sorting_vis.gif)
 #### Sorting Algorithms Include:
 - Selection sort
@@ -12,8 +12,6 @@ Provides a visualization of common sorting algorithms.
 - Heap sort
 
 Can choose which sorting algorithms to see working side by side and compare speeds as well as set the amount of elements to sort. Changing the duration of the thread's sleep in the waitTime() function in sorting_algos.h will slow down or speed up sorting time, allowing for better visualization.
-
-This project was created as a learning exercise in c++ gui design with ImGui and is my first time working with gui's and threading in c++.
 
 ## Dependencies
 
@@ -44,3 +42,7 @@ and download the zip file and extract.
 
 
 If running on Windows, a Visual Studio solution will be created, simply open and run. If on Linux, an executable will be created and can be ran automatically.
+
+### To Be Added
+- Cursor that tracks which element(s) is(are) being modified/compared
+- Pausing and step-by-step incrementation of algorithms
