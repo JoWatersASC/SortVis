@@ -18,6 +18,8 @@ This project was created as a learning exercise in c++ gui design with ImGui and
 ## Dependencies
 
 - Vanilla ImGui 1.72+
+- OpenGL
+- SDL2
 - C++17
 - CMake
 
@@ -32,5 +34,13 @@ cd SortVis/build/
 cmake -S .. -B .
 make
 ```
+
+All files needed should be included in the include folder, but if you need to download SDL2 run
+```
+sudo apt install libsdl2-dev
+```
+on Linux. For Windows, go to the [SDL2 GitHub](https://github.com/libsdl-org/SDL/releases/tag/release-2.30.5)
+and download the zip file and extract. 
+
 
 If running on Windows, a Visual Studio solution will be created, simply open and run. If on Linux, an executable will be created and can be ran automatically.
